@@ -1,0 +1,290 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Didinhe Bridge — tổng quan kiến trúc",
+    "subtitle": "Orchestrator Windows: GitHub → Cursor → giao hàng Git trên nhánh ai/*",
+    "output": ".archify/architecture-didinhe-bridge-20261029-1600/didinhe-bridge-overview.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "git@github.com:mytravelgroup/didinhe-mono.git",
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "link_mode": "local-only"
+    },
+    "legend": {
+      "mode": "auto"
+    }
+  },
+  "components": [
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "Chủ sở hữu",
+      "sublabel": "Human / Owner",
+      "pos": [40, 120],
+      "size": [130, 64],
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 48,
+          "end_line": 63
+        }
+      ]
+    },
+    {
+      "id": "reviewer",
+      "type": "external",
+      "label": "Reviewer ngoài",
+      "sublabel": "ChatGPT trên GitHub (tùy chọn)",
+      "pos": [40, 300],
+      "size": [130, 72],
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 55,
+          "end_line": 57
+        }
+      ]
+    },
+    {
+      "id": "github",
+      "type": "external",
+      "label": "GitHub",
+      "sublabel": "Issues · labels · PR · comments",
+      "pos": [280, 200],
+      "size": [150, 72],
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 54,
+          "end_line": 55
+        }
+      ]
+    },
+    {
+      "id": "gh-actions",
+      "type": "security",
+      "label": "GitHub Actions",
+      "sublabel": "didinhe-chatgpt-review-transition",
+      "pos": [280, 360],
+      "size": [150, 72],
+      "sources": [
+        {
+          "path": ".github/workflows/didinhe-chatgpt-review-transition.yml",
+          "line": 1,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "bridge",
+      "type": "backend",
+      "label": "Didinhe Bridge",
+      "sublabel": "Local Windows orchestrator",
+      "tag": "poll 10s",
+      "pos": [520, 180],
+      "size": [170, 80],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/README.md",
+          "line": 1,
+          "end_line": 4
+        },
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 259,
+          "end_line": 259
+        },
+        {
+          "path": "tools/didinhe-bridge/src/bridge-lifecycle.ts",
+          "line": 93,
+          "end_line": 94
+        }
+      ]
+    },
+    {
+      "id": "task-repo",
+      "type": "database",
+      "label": "Task repository",
+      "sublabel": "Checkout chính · nhánh ai/*",
+      "pos": [780, 120],
+      "size": [160, 72],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/README.md",
+          "line": 47,
+          "end_line": 47
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 61,
+          "end_line": 61
+        }
+      ]
+    },
+    {
+      "id": "cursor",
+      "type": "external",
+      "label": "Cursor Agent",
+      "sublabel": "CLI · chỉ sửa working tree",
+      "pos": [780, 280],
+      "size": [160, 72],
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 56,
+          "end_line": 61
+        },
+        {
+          "path": "tools/didinhe-bridge/src/cursor-agent.ts",
+          "line": 1,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "dashboard",
+      "type": "frontend",
+      "label": "Dashboard",
+      "sublabel": "127.0.0.1:4317 · read-only",
+      "pos": [520, 360],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/README.md",
+          "line": 44,
+          "end_line": 44
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 58,
+          "end_line": 58
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Máy Windows (Bridge host)",
+      "wraps": ["bridge", "task-repo", "cursor", "dashboard"]
+    },
+    {
+      "kind": "region",
+      "label": "GitHub (control plane)",
+      "wraps": ["github", "gh-actions"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "owner-to-github",
+      "from": "owner",
+      "to": "github",
+      "label": "issues · ai-ready · merge",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "reviewer-to-github",
+      "from": "reviewer",
+      "to": "github",
+      "label": "PR review comment",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "github-to-bridge",
+      "from": "github",
+      "to": "bridge",
+      "label": "poll gh API",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "bridge-to-github",
+      "from": "bridge",
+      "to": "github",
+      "label": "claim · PR · labels · checkpoints",
+      "variant": "dashed"
+    },
+    {
+      "id": "github-to-actions",
+      "from": "github",
+      "to": "gh-actions",
+      "label": "comment / review event",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "actions-to-github",
+      "from": "gh-actions",
+      "to": "github",
+      "label": "ai-review-* labels",
+      "variant": "security"
+    },
+    {
+      "id": "bridge-to-cursor",
+      "from": "bridge",
+      "to": "cursor",
+      "label": "invoke agent",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "cursor-to-repo",
+      "from": "cursor",
+      "to": "task-repo",
+      "label": "edit files",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "bridge-to-repo",
+      "from": "bridge",
+      "to": "task-repo",
+      "label": "branch · commit · push",
+      "variant": "emphasis"
+    },
+    {
+      "id": "bridge-to-dashboard",
+      "from": "bridge",
+      "to": "dashboard",
+      "label": "pipeline / history",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Luồng task chính (ai-ready → review)",
+      "items": [
+        "Mỗi poll: tối đa một việc — recovery ai-processing, blocked control, review-fix, ops-ready, rồi ai-ready (task-orchestration.ts).",
+        "Sau claim: readiness → nhánh ai/* → Cursor → validate → commit/push → PR → checkpoint/handoff → ai-review-ready.",
+        "CHANGES_REQUESTED → ai-review-fix; APPROVED → workflow Actions gán ai-review-approved / ai-done; owner merge thủ công."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Bridge runtime (trong một process tree)",
+      "items": [
+        "pnpm bridge:dev → bootstrap → launcher → supervisor → src/index.ts (README §Runtime).",
+        "Orchestration TS chạy từ control-plane worktree detached origin/master; Git task dùng DIDINHE_BRIDGE_TASK_REPO_ROOT.",
+        "Không gọi ChatGPT API; không auto-merge PR (workflow §1).",
+        "Owner đọc dashboard read-only (Tailscale Serve tùy chọn — DASHBOARD.md)."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Tài liệu vs code",
+      "items": [
+        "Nguồn sự thật vận hành: docs/didinhe-bridge-workflow.md (baseline #296).",
+        "didinhe-bridge-poc.md giữ lịch sử POC/diagram cũ — không thay workflow canonical.",
+        "apps/mobile/AGENTS.md không mô tả Bridge; operator doc bắt đầu tại tools/didinhe-bridge/README.md."
+      ]
+    }
+  ]
+}

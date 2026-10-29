@@ -1,0 +1,510 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Bridge — vòng đời Git workspace cho một task",
+    "subtitle": "Preflight · nhánh ai/* trên checkout chính · cleanup · restart",
+    "output": ".archify/workflow-bridge-git-workspace-20261029-1620/bridge-git-workspace-lifecycle.html",
+    "quality_profile": "standard",
+    "repository": {
+      "url": "git@github.com:mytravelgroup/didinhe-mono.git",
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "link_mode": "local-only"
+    }
+  },
+  "lanes": [
+    { "id": "bootstrap", "label": "Bootstrap / supervisor" },
+    { "id": "task_git", "label": "Task repo (main worktree)" },
+    { "id": "bridge", "label": "Bridge orchestrator" },
+    { "id": "linked", "label": "Linked worktrees" },
+    { "id": "recovery", "label": "Recovery / rủi ro", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "startup", "label": "Khởi động", "fromCol": 0, "toCol": 1 },
+    { "id": "preflight", "label": "Preflight & readiness", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "work", "label": "Task branch & delivery", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    {
+      "id": "dirty_gates",
+      "label": "Dirty working tree gates",
+      "lane": "recovery",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "security"
+    },
+    {
+      "id": "isolation",
+      "label": "Cô lập đa task/process",
+      "lane": "bootstrap",
+      "fromCol": 0,
+      "toCol": 1,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "acquire_lock",
+    "resolve_task_repo",
+    "repo_state",
+    "readiness",
+    "create_branch_same_wt",
+    "cursor_cwd",
+    "validate_commit",
+    "checkpoint",
+    "return_master"
+  ],
+  "nodes": [
+    {
+      "id": "cp_worktree_ready",
+      "lane": "bootstrap",
+      "col": 0,
+      "type": "backend",
+      "label": "Control-plane WT",
+      "sublabel": "detach origin/master · dirty → throw",
+      "width": 148,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/bootstrap/bridge-bootstrap.cjs",
+          "line": 116,
+          "end_line": 120
+        }
+      ]
+    },
+    {
+      "id": "prespawn_wt",
+      "lane": "bootstrap",
+      "col": 1,
+      "type": "security",
+      "label": "Supervisor pre-spawn",
+      "sublabel": "dirty → skip child · hoặc sync CP",
+      "width": 152,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/bridge-control-plane-supervisor-prespawn.ts",
+          "line": 27,
+          "end_line": 66
+        }
+      ]
+    },
+    {
+      "id": "acquire_lock",
+      "lane": "bridge",
+      "col": 0,
+      "type": "security",
+      "label": "Single-instance lock",
+      "sublabel": "temp dir theo repoRoot hash",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/single-instance-lock.ts",
+          "line": 105,
+          "end_line": 111
+        }
+      ]
+    },
+    {
+      "id": "resolve_task_repo",
+      "lane": "bridge",
+      "col": 1,
+      "type": "backend",
+      "label": "resolveRepoRoot()",
+      "sublabel": "DIDINHE_BRIDGE_TASK_REPO_ROOT",
+      "width": 150,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 360,
+          "end_line": 368
+        }
+      ]
+    },
+    {
+      "id": "repo_state",
+      "lane": "task_git",
+      "col": 2,
+      "type": "backend",
+      "label": "getRepositoryTaskState",
+      "sublabel": "master · ai/* · unrelated",
+      "width": 150,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 496,
+          "end_line": 527
+        },
+        {
+          "path": "tools/didinhe-bridge/src/task-orchestration.ts",
+          "line": 439,
+          "end_line": 457
+        }
+      ]
+    },
+    {
+      "id": "block_master_dirty",
+      "lane": "recovery",
+      "col": 2,
+      "type": "security",
+      "label": "master-dirty",
+      "sublabel": "porcelain trên task repo",
+      "width": 130,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 503,
+          "end_line": 509
+        }
+      ]
+    },
+    {
+      "id": "block_task_pending",
+      "lane": "recovery",
+      "col": 3,
+      "type": "security",
+      "label": "task-branch-pending",
+      "sublabel": "HEAD ai/* · không phân biệt dirty",
+      "width": 150,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 515,
+          "end_line": 520
+        }
+      ]
+    },
+    {
+      "id": "recover_unrelated",
+      "lane": "recovery",
+      "col": 3,
+      "yOffset": 110,
+      "type": "backend",
+      "label": "Recover unrelated",
+      "sublabel": "clean → switch master",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/repository-preflight-recovery.ts",
+          "line": 17,
+          "end_line": 57
+        }
+      ]
+    },
+    {
+      "id": "readiness",
+      "lane": "task_git",
+      "col": 3,
+      "type": "backend",
+      "label": "prepareRepositoryForTask",
+      "sublabel": "master + clean + ff-only sync",
+      "width": 158,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/repository-readiness.ts",
+          "line": 33,
+          "end_line": 42
+        }
+      ]
+    },
+    {
+      "id": "create_branch_same_wt",
+      "lane": "task_git",
+      "col": 4,
+      "yOffset": 0,
+      "type": "backend",
+      "label": "ensureSafeTaskBranch",
+      "sublabel": "checkout -b ai/* (same WT)",
+      "width": 158,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 530,
+          "end_line": 534
+        },
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 480,
+          "end_line": 492
+        }
+      ]
+    },
+    {
+      "id": "cursor_cwd",
+      "lane": "bridge",
+      "col": 5,
+      "type": "external",
+      "label": "Cursor Agent",
+      "sublabel": "cwd task repo · expectedTaskBranch",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 2706,
+          "end_line": 2741
+        },
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 422,
+          "end_line": 440
+        }
+      ]
+    },
+    {
+      "id": "validate_commit",
+      "lane": "task_git",
+      "col": 5,
+      "yOffset": -100,
+      "type": "security",
+      "label": "Validate · commit · push",
+      "sublabel": "assertTaskBranchAtCurrent",
+      "width": 172,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 1866,
+          "end_line": 1994
+        },
+        {
+          "path": "tools/didinhe-bridge/src/task-git-lifecycle.ts",
+          "line": 165,
+          "end_line": 174
+        }
+      ]
+    },
+    {
+      "id": "checkpoint",
+      "lane": "bridge",
+      "col": 5,
+      "yOffset": 100,
+      "type": "database",
+      "label": "Checkpoints",
+      "sublabel": "GitHub PR comment + .ai/logs",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/pr-delivery-checkpoint.ts",
+          "line": 5,
+          "end_line": 21
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 19,
+          "end_line": 19
+        }
+      ]
+    },
+    {
+      "id": "return_master",
+      "lane": "task_git",
+      "col": 5,
+      "yOffset": 100,
+      "type": "backend",
+      "label": "returnToCleanMaster",
+      "sublabel": "sau delivery thành công",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/task-git-lifecycle.ts",
+          "line": 169,
+          "end_line": 174
+        }
+      ]
+    },
+    {
+      "id": "cursor_fail_cleanup",
+      "lane": "recovery",
+      "col": 4,
+      "type": "backend",
+      "label": "Cursor failure cleanup",
+      "sublabel": "clean → switch master",
+      "width": 150,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/task-failure-cleanup.ts",
+          "line": 18,
+          "end_line": 57
+        }
+      ]
+    },
+    {
+      "id": "preview_sync",
+      "lane": "linked",
+      "col": 5,
+      "type": "backend",
+      "label": "Mobile preview sync",
+      "sublabel": "detach · refused-dirty",
+      "width": 148,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/mobile-preview/worktree.ts",
+          "line": 198,
+          "end_line": 204
+        }
+      ]
+    },
+    {
+      "id": "restart_recovery",
+      "lane": "recovery",
+      "col": 5,
+      "yOffset": 100,
+      "type": "database",
+      "label": "Bridge restart",
+      "sublabel": "lock stale · checkpoint resume",
+      "width": 140,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 96,
+          "end_line": 98
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 97,
+          "end_line": 97
+        }
+      ]
+    },
+    {
+      "id": "risk_wrong_wt",
+      "lane": "recovery",
+      "col": 4,
+      "yOffset": -110,
+      "type": "security",
+      "label": "Rủi ro sai checkout",
+      "sublabel": "supervision · assertTaskBranch",
+      "width": 148,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 2655,
+          "end_line": 2661
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "cp_worktree_ready",
+      "to": "prespawn_wt",
+      "label": "spawn child"
+    },
+    {
+      "from": "acquire_lock",
+      "to": "resolve_task_repo",
+      "label": "per repoRoot"
+    },
+    {
+      "from": "resolve_task_repo",
+      "to": "repo_state",
+      "label": "preflight"
+    },
+    {
+      "from": "repo_state",
+      "to": "block_master_dirty",
+      "label": "master + porcelain",
+      "variant": "security"
+    },
+    {
+      "from": "repo_state",
+      "to": "block_task_pending",
+      "label": "HEAD ai/*",
+      "variant": "security"
+    },
+    {
+      "from": "repo_state",
+      "to": "recover_unrelated",
+      "label": "unrelated + clean",
+      "variant": "dashed"
+    },
+    {
+      "from": "recover_unrelated",
+      "to": "readiness",
+      "label": "recovered"
+    },
+    {
+      "from": "repo_state",
+      "to": "readiness",
+      "label": "canStartNewTask"
+    },
+    {
+      "from": "readiness",
+      "to": "create_branch_same_wt",
+      "label": "claim ok"
+    },
+    {
+      "from": "create_branch_same_wt",
+      "to": "cursor_cwd",
+      "label": "baseline clean"
+    },
+    {
+      "from": "cursor_cwd",
+      "to": "validate_commit",
+      "label": "success"
+    },
+    {
+      "from": "cursor_cwd",
+      "to": "cursor_fail_cleanup",
+      "label": "failure",
+      "variant": "dashed"
+    },
+    {
+      "from": "validate_commit",
+      "to": "checkpoint",
+      "label": "PR + persist"
+    },
+    {
+      "from": "validate_commit",
+      "to": "return_master",
+      "label": "delivery ok",
+      "variant": "dashed"
+    },
+    {
+      "from": "validate_commit",
+      "to": "preview_sync",
+      "label": "mobile delivery",
+      "variant": "dashed"
+    },
+    {
+      "from": "checkpoint",
+      "to": "return_master",
+      "label": "completeTaskDelivery"
+    },
+    {
+      "from": "cursor_fail_cleanup",
+      "to": "restart_recovery",
+      "label": "dirty → manual",
+      "variant": "security"
+    },
+    {
+      "from": "prespawn_wt",
+      "to": "block_master_dirty",
+      "label": "dirty skip spawn",
+      "variant": "security"
+    },
+    {
+      "from": "cursor_cwd",
+      "to": "risk_wrong_wt",
+      "label": "nếu lệch branch",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Giữ lại vs cleanup",
+      "items": [
+        "Thành công: checkpoint trên GitHub + returnToCleanMaster (task repo)",
+        "Cursor fail + clean task branch: switch master (task-failure-cleanup.ts)",
+        "Cursor fail + dirty task branch: manual-recovery-required, giữ nhánh",
+        "Linked worktrees (CP, preview) không bị xóa tự động khi task xong"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cô lập đa task",
+      "items": [
+        "Single-instance lock: một Bridge process / repo hash",
+        "Tuần tự task: checkout chính chỉ một HEAD ai/* tại một thời điểm",
+        "Preview worktree tách HEAD khỏi task branch"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,410 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Bridge — một task ai-ready đến giao hàng hoặc chặn",
+    "subtitle": "Nhánh lỗi và điểm owner can thiệp (implementation hiện tại)",
+    "output": ".archify/workflow-bridge-task-lifecycle-20261029-1606/bridge-task-lifecycle.html",
+    "quality_profile": "standard",
+    "repository": {
+      "url": "git@github.com:mytravelgroup/didinhe-mono.git",
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "link_mode": "local-only"
+    }
+  },
+  "lanes": [
+    { "id": "github", "label": "GitHub (labels)" },
+    { "id": "bridge", "label": "Bridge orchestrator" },
+    { "id": "owner", "label": "Owner can thiệp", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "queue", "label": "Chọn task", "fromCol": 0, "toCol": 1 },
+    { "id": "preflight", "label": "Preflight + readiness", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "work", "label": "Cursor + delivery", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    {
+      "id": "block_gate",
+      "label": "Repository blocked",
+      "lane": "owner",
+      "fromCol": 2,
+      "toCol": 4,
+      "variant": "security"
+    },
+    {
+      "id": "delivery_failures",
+      "label": "Delivery / push failures",
+      "lane": "owner",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "task_selected",
+    "repo_preflight",
+    "readiness",
+    "claim",
+    "cursor_run",
+    "git_deliver",
+    "done"
+  ],
+  "nodes": [
+    {
+      "id": "task_selected",
+      "lane": "github",
+      "col": 0,
+      "type": "external",
+      "label": "ai-ready",
+      "sublabel": "issue OPEN · được chọn poll",
+      "width": 128,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 147,
+          "end_line": 147
+        }
+      ]
+    },
+    {
+      "id": "repo_preflight",
+      "lane": "bridge",
+      "col": 1,
+      "type": "backend",
+      "label": "Preflight repo",
+      "sublabel": "canStartNewTask · nhánh sạch",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/task-orchestration.ts",
+          "line": 437,
+          "end_line": 468
+        }
+      ]
+    },
+    {
+      "id": "readiness",
+      "lane": "bridge",
+      "col": 2,
+      "type": "backend",
+      "label": "Readiness",
+      "sublabel": "master sạch · fetch · ff-only",
+      "width": 140,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 153,
+          "end_line": 153
+        }
+      ]
+    },
+    {
+      "id": "claim",
+      "lane": "github",
+      "col": 3,
+      "type": "backend",
+      "label": "ai-processing",
+      "sublabel": "claim · nhánh ai/* mới",
+      "width": 140,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 154,
+          "end_line": 155
+        }
+      ]
+    },
+    {
+      "id": "cursor_run",
+      "lane": "bridge",
+      "col": 4,
+      "type": "backend",
+      "label": "Cursor",
+      "sublabel": "supervise · stream-json OK",
+      "width": 132,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/claimed-task-processing.ts",
+          "line": 87,
+          "end_line": 91
+        }
+      ]
+    },
+    {
+      "id": "git_deliver",
+      "lane": "bridge",
+      "col": 5,
+      "type": "backend",
+      "label": "Git delivery",
+      "sublabel": "format · validate · PR · handoff",
+      "width": 148,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 158,
+          "end_line": 162
+        }
+      ]
+    },
+    {
+      "id": "done",
+      "lane": "github",
+      "col": 5,
+      "type": "frontend",
+      "label": "ai-review-ready",
+      "sublabel": "Bridge xong phần coding",
+      "width": 140,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 162,
+          "end_line": 162
+        }
+      ]
+    },
+    {
+      "id": "fail_gate",
+      "lane": "owner",
+      "col": 3,
+      "type": "security",
+      "label": "Terminal failure",
+      "sublabel": "markTaskFailed()",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/claimed-task-processing.ts",
+          "line": 265,
+          "end_line": 266
+        }
+      ]
+    },
+    {
+      "id": "blocked_repo",
+      "lane": "owner",
+      "col": 2,
+      "type": "security",
+      "label": "bridge-blocked",
+      "sublabel": "bridge-control · vẫn ai-ready",
+      "width": 148,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 153,
+          "end_line": 153
+        }
+      ]
+    },
+    {
+      "id": "owner_resume",
+      "lane": "owner",
+      "col": 1,
+      "type": "external",
+      "label": "bridge-resume",
+      "sublabel": "owner sửa repo rồi gắn label",
+      "width": 148,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 144,
+          "end_line": 144
+        }
+      ]
+    },
+    {
+      "id": "retry_poll",
+      "lane": "github",
+      "col": 4,
+      "type": "messagebus",
+      "label": "Poll recovery",
+      "sublabel": "giữ ai-processing",
+      "width": 140,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 130,
+          "end_line": 130
+        }
+      ]
+    },
+    {
+      "id": "delivery_blocked",
+      "lane": "owner",
+      "col": 4,
+      "type": "security",
+      "label": "ai-delivery-blocked",
+      "sublabel": "git push bị chặn",
+      "width": 148,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/claimed-task-processing.ts",
+          "line": 192,
+          "end_line": 217
+        }
+      ]
+    },
+    {
+      "id": "manual_recovery",
+      "lane": "owner",
+      "col": 5,
+      "type": "external",
+      "label": "Manual recovery",
+      "sublabel": "repo / Cursor claim",
+      "width": 140,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/claimed-task-processing.ts",
+          "line": 239,
+          "end_line": 244
+        }
+      ]
+    },
+    {
+      "id": "ai_failed",
+      "lane": "owner",
+      "col": 0,
+      "type": "security",
+      "label": "ai-failed",
+      "sublabel": "terminal sau claim",
+      "width": 128,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 199,
+          "end_line": 199
+        }
+      ]
+    },
+    {
+      "id": "claim_failed",
+      "lane": "bridge",
+      "col": 3,
+      "type": "security",
+      "label": "Claim failed",
+      "sublabel": "log · poll sau",
+      "width": 132,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/task-orchestration.ts",
+          "line": 576,
+          "end_line": 582
+        }
+      ]
+    }
+  ],
+  "edges": [
+    { "id": "e-select-preflight", "from": "task_selected", "to": "repo_preflight", "variant": "emphasis" },
+    { "id": "e-preflight-readiness", "from": "repo_preflight", "to": "readiness" },
+    { "id": "e-readiness-claim", "from": "readiness", "to": "claim", "variant": "emphasis" },
+    { "id": "e-claim-cursor", "from": "claim", "to": "cursor_run" },
+    { "id": "e-cursor-deliver", "from": "cursor_run", "to": "git_deliver" },
+    { "id": "e-deliver-done", "from": "git_deliver", "to": "done", "variant": "emphasis" },
+    {
+      "id": "e-readiness-block",
+      "from": "readiness",
+      "to": "blocked_repo",
+      "label": "preflight / readiness fail",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e-owner-resume",
+      "from": "owner_resume",
+      "to": "readiness",
+      "label": "Bridge retry blocked issue",
+      "variant": "dashed"
+    },
+    {
+      "id": "e-block-wait",
+      "from": "blocked_repo",
+      "to": "owner_resume",
+      "label": "chờ owner",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "e-claim-fail",
+      "from": "claim",
+      "to": "claim_failed",
+      "label": "claim error",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e-deliver-retry",
+      "from": "git_deliver",
+      "to": "retry_poll",
+      "label": "checkpoint / handoff",
+      "variant": "dashed",
+      "role": "error"
+    },
+    {
+      "id": "e-retry-deliver",
+      "from": "retry_poll",
+      "to": "git_deliver",
+      "label": "poll tiếp",
+      "variant": "dashed",
+      "role": "return"
+    },
+    {
+      "id": "e-push-blocked",
+      "from": "git_deliver",
+      "to": "delivery_blocked",
+      "label": "GitPushDeliveryBlocked",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e-cursor-manual",
+      "from": "cursor_run",
+      "to": "manual_recovery",
+      "label": "supervision no fail label",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e-cursor-terminal",
+      "from": "cursor_run",
+      "to": "fail_gate",
+      "label": "Cursor / delivery",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e-fail-label",
+      "from": "fail_gate",
+      "to": "ai_failed",
+      "label": "→ ai-failed",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Phạm vi diagram",
+      "items": [
+        "Chỉ task mới từ ai-ready (không gồm review-fix ai-review-fix* hay ops-ready).",
+        "Hoàn tất = ai-review-ready; merge PR là bước owner sau APPROVED (workflow §3.7).",
+        "Validation-repair có thể gọi lại Cursor trong ai-processing (§8.3) — gộp trong bước Git delivery."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Owner thường phải làm gì",
+      "items": [
+        "bridge-blocked: sửa master/repo, gắn bridge-resume trên issue bridge-control.",
+        "ai-delivery-blocked: xử lý push/hook/remote; có thể cần bridge-resume theo comment metadata.",
+        "ai-failed / manual recovery: dọn repo, sửa nguyên nhân, gắn lại ai-ready khi sẵn sàng.",
+        "Claim failed: kiểm tra GitHub/gh auth; issue thường vẫn ai-ready cho poll sau."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Không vẽ ở đây",
+      "items": [
+        "External review → ai-review-fix loop (workflow §3.5).",
+        "ai-processing recovery chạy trước queue chọn ai-ready mới (poll step 1).",
+        "Restart exit 75/76/77 khi đổi orchestration code — không đổi label issue."
+      ]
+    }
+  ]
+}

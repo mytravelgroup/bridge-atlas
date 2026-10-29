@@ -1,0 +1,473 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Didinhe Bridge — Git working tree & linked worktrees",
+    "subtitle": "Checkout chính cho ai/* · control-plane & mobile-preview tách riêng",
+    "output": ".archify/architecture-bridge-git-workspace-20261029-1620/bridge-git-workspace.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "git@github.com:mytravelgroup/didinhe-mono.git",
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "link_mode": "local-only"
+    },
+    "legend": {
+      "mode": "auto"
+    }
+  },
+  "components": [
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "Owner checkout",
+      "sublabel": "Monorepo root (main worktree)",
+      "pos": [40, 200],
+      "size": [140, 68],
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 79,
+          "end_line": 87
+        }
+      ]
+    },
+    {
+      "id": "git_common",
+      "type": "database",
+      "label": "Git metadata",
+      "sublabel": "common dir · objects · worktree registry",
+      "tag": "shared",
+      "pos": [300, 40],
+      "size": [170, 72],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/bootstrap/bridge-bootstrap.cjs",
+          "line": 41,
+          "end_line": 43
+        },
+        {
+          "path": "tools/didinhe-bridge/src/mobile-preview/worktree.ts",
+          "line": 78,
+          "end_line": 82
+        }
+      ]
+    },
+    {
+      "id": "main_checkout",
+      "type": "database",
+      "label": "Task working tree",
+      "sublabel": "master · nhánh ai/* (cùng directory)",
+      "tag": "DIDINHE_BRIDGE_TASK_REPO_ROOT",
+      "pos": [300, 200],
+      "size": [190, 80],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 360,
+          "end_line": 368
+        },
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 530,
+          "end_line": 534
+        },
+        {
+          "path": "tools/didinhe-bridge/README.md",
+          "line": 47,
+          "end_line": 47
+        }
+      ]
+    },
+    {
+      "id": "control_plane_wt",
+      "type": "backend",
+      "label": "Control-plane worktree",
+      "sublabel": "CP worktree · detach origin/master",
+      "pos": [560, 40],
+      "size": [220, 80],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/bootstrap/bridge-bootstrap.cjs",
+          "line": 15,
+          "end_line": 18
+        },
+        {
+          "path": "tools/didinhe-bridge/bootstrap/bridge-bootstrap.cjs",
+          "line": 107,
+          "end_line": 114
+        }
+      ]
+    },
+    {
+      "id": "mobile_preview_wt",
+      "type": "backend",
+      "label": "Mobile-preview worktree",
+      "sublabel": ".worktrees/mobile-preview · detached @ PR head",
+      "pos": [560, 360],
+      "size": [200, 80],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/mobile-preview/worktree-paths.ts",
+          "line": 3,
+          "end_line": 8
+        },
+        {
+          "path": "tools/didinhe-bridge/src/mobile-preview/worktree.ts",
+          "line": 169,
+          "end_line": 170
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 59,
+          "end_line": 59
+        }
+      ]
+    },
+    {
+      "id": "bootstrap",
+      "type": "backend",
+      "label": "Bootstrap entry",
+      "sublabel": "git alias · prepareControlPlaneWorktree",
+      "pos": [40, 40],
+      "size": [150, 72],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/bootstrap/bridge-bootstrap.cjs",
+          "line": 245,
+          "end_line": 248
+        },
+        {
+          "path": "tools/didinhe-bridge/bootstrap/bridge-bootstrap.cjs",
+          "line": 88,
+          "end_line": 132
+        }
+      ]
+    },
+    {
+      "id": "orch_process",
+      "type": "backend",
+      "label": "Bridge orchestration",
+      "sublabel": "launcher → supervisor → src/index.ts",
+      "tag": "TS từ control-plane",
+      "pos": [820, 40],
+      "size": [170, 80],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/bootstrap/bridge-bootstrap.cjs",
+          "line": 200,
+          "end_line": 218
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 86,
+          "end_line": 87
+        }
+      ]
+    },
+    {
+      "id": "bridge_git_ops",
+      "type": "backend",
+      "label": "Task Git operations",
+      "sublabel": "resolveRepoRoot() → task repo",
+      "pos": [820, 200],
+      "size": [170, 72],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 360,
+          "end_line": 368
+        },
+        {
+          "path": "tools/didinhe-bridge/src/claimed-task-processing.ts",
+          "line": 87,
+          "end_line": 90
+        }
+      ]
+    },
+    {
+      "id": "cursor",
+      "type": "external",
+      "label": "Cursor Agent",
+      "sublabel": "cwd = task repo · nhánh ai/*",
+      "pos": [1060, 160],
+      "size": [150, 72],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 2737,
+          "end_line": 2741
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 56,
+          "end_line": 56
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "type": "security",
+      "label": "Delivery validation",
+      "sublabel": "pnpm gates trong task repo",
+      "pos": [1060, 280],
+      "size": [165, 72],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/task-git-lifecycle.ts",
+          "line": 72,
+          "end_line": 76
+        },
+        {
+          "path": "tools/didinhe-bridge/src/delivery-validation-repair-loop.ts",
+          "line": 48,
+          "end_line": 48
+        }
+      ]
+    },
+    {
+      "id": "metro_expo",
+      "type": "backend",
+      "label": "Metro / Expo (ops)",
+      "sublabel": "mobile-expo-start → preview app cwd",
+      "pos": [820, 360],
+      "size": [170, 72],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/operations/mobile-expo-start-runtime.ts",
+          "line": 30,
+          "end_line": 47
+        },
+        {
+          "path": "tools/didinhe-bridge/src/operations/mobile-expo-start-target.ts",
+          "line": 38,
+          "end_line": 44
+        }
+      ]
+    },
+    {
+      "id": "durables",
+      "type": "database",
+      "label": "Durable state",
+      "sublabel": ".ai/logs/bridge · checkpoint PR trên GitHub",
+      "pos": [40, 360],
+      "size": [180, 72],
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 19,
+          "end_line": 19
+        },
+        {
+          "path": "tools/didinhe-bridge/src/pr-delivery-checkpoint.ts",
+          "line": 5,
+          "end_line": 5
+        },
+        {
+          "path": "tools/didinhe-bridge/src/operations/bridge-ops-process-registry.ts",
+          "line": 2,
+          "end_line": 2
+        }
+      ]
+    },
+    {
+      "id": "single_lock",
+      "type": "security",
+      "label": "Single-instance lock",
+      "sublabel": "%TEMP%/didinhe-bridge-{repoHash}",
+      "pos": [1060, 40],
+      "size": [165, 68],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/single-instance-lock.ts",
+          "line": 105,
+          "end_line": 118
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 89,
+          "end_line": 89
+        }
+      ]
+    },
+    {
+      "id": "github",
+      "type": "external",
+      "label": "GitHub remote",
+      "sublabel": "origin · branches · PR comments",
+      "pos": [1060, 400],
+      "size": [150, 68],
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/repository-readiness.ts",
+          "line": 45,
+          "end_line": 48
+        }
+      ]
+    },
+    {
+      "id": "dev_core_note",
+      "type": "messagebus",
+      "label": "dev:core (dev only)",
+      "sublabel": "dev:core · một worktree",
+      "pos": [40, 480],
+      "size": [150, 68],
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 88,
+          "end_line": 88
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "bootstrap-main-cwd",
+      "from": "bootstrap",
+      "to": "main_checkout",
+      "label": "cwd taskRepoRoot"
+    },
+    {
+      "id": "bootstrap-cp-wt",
+      "from": "bootstrap",
+      "to": "control_plane_wt",
+      "label": "worktree add/switch detach",
+      "variant": "emphasis"
+    },
+    {
+      "id": "meta-links-main",
+      "from": "git_common",
+      "to": "main_checkout",
+      "label": "HEAD branch/ref",
+      "variant": "dashed"
+    },
+    {
+      "id": "meta-links-cp",
+      "from": "git_common",
+      "to": "control_plane_wt",
+      "label": "linked worktree",
+      "variant": "dashed"
+    },
+    {
+      "id": "meta-links-preview",
+      "from": "git_common",
+      "to": "mobile_preview_wt",
+      "label": "linked worktree",
+      "variant": "dashed"
+    },
+    {
+      "id": "bootstrap-spawns-orch",
+      "from": "bootstrap",
+      "to": "orch_process",
+      "label": "TASK_REPO_ROOT env",
+      "variant": "emphasis"
+    },
+    {
+      "id": "orch-loads-cp",
+      "from": "orch_process",
+      "to": "control_plane_wt",
+      "label": "Node load orchestration TS"
+    },
+    {
+      "id": "orch-git-task",
+      "from": "orch_process",
+      "to": "bridge_git_ops",
+      "label": "poll · claim · delivery"
+    },
+    {
+      "id": "git-ops-main",
+      "from": "bridge_git_ops",
+      "to": "main_checkout",
+      "label": "checkout -b ai/* (không worktree/task)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cursor-main",
+      "from": "cursor",
+      "to": "main_checkout",
+      "label": "cwd repoRoot",
+      "variant": "emphasis"
+    },
+    {
+      "id": "validation-main",
+      "from": "validation",
+      "to": "main_checkout",
+      "label": "commit · push · gates"
+    },
+    {
+      "id": "orch-preview-sync",
+      "from": "orch_process",
+      "to": "mobile_preview_wt",
+      "label": "syncMobilePreviewWorktree",
+      "variant": "dashed"
+    },
+    {
+      "id": "metro-preview",
+      "from": "metro_expo",
+      "to": "mobile_preview_wt",
+      "label": "cwd apps/mobile (ops)"
+    },
+    {
+      "id": "durables-main",
+      "from": "durables",
+      "to": "main_checkout",
+      "label": ".ai/logs/bridge/*"
+    },
+    {
+      "id": "durables-github",
+      "from": "durables",
+      "to": "github",
+      "label": "checkpoint comments"
+    },
+    {
+      "id": "git-ops-remote",
+      "from": "bridge_git_ops",
+      "to": "github",
+      "label": "fetch · push ai/*"
+    },
+    {
+      "id": "lock-orch",
+      "from": "single_lock",
+      "to": "orch_process",
+      "label": "1 Bridge / repo hash",
+      "variant": "security"
+    },
+    {
+      "id": "dev-core-alt",
+      "from": "dev_core_note",
+      "to": "orch_process",
+      "label": "cùng worktree với task",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Xác nhận từ code",
+      "items": [
+        "Task ai/* dùng checkout chính (git checkout -b), không tạo linked worktree mỗi task",
+        "pnpm dev: bootstrap giữ .worktrees/bridge-control-plane @ origin/master; Git task qua DIDINHE_BRIDGE_TASK_REPO_ROOT",
+        "Mobile preview: worktree riêng .worktrees/mobile-preview, detached HEAD",
+        "Cursor + validation + commit/push: cwd và git ops trên task repo root"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Rủi ro suy luận (chưa tái hiện)",
+      "items": [
+        "Owner sửa file trên master hoặc nhánh lạ trong lúc Bridge đang chạy → poll có thể block hoặc supervision lệch nhánh kỳ vọng",
+        "Metro fallback main-worktree-root (khi preview chưa ready) có thể trùng cwd task branch — cần xác nhận ops thực tế",
+        "Stale mobile-preview path không đăng ký worktree → sync refused (worktree.ts)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Cần điều tra thêm",
+      "items": [
+        "getRepositoryTaskState trên nhánh ai/* trả task-branch-pending dù working tree dirty hay sạch — phạm vi dirty riêng cho nhánh task ở preflight?",
+        "Hành vi đầy đủ khi nhiều linked worktree + rebase/merge dở trên task checkout"
+      ]
+    }
+  ]
+}

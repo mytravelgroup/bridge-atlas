@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bridge Atlas — Didinhe Bridge</title>
+    <meta
+      name="description"
+      content="Bản đồ kiến trúc và luồng vận hành Didinhe Bridge (diagram Archify)."
+    />
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="layout">
+        <h1>Bridge Atlas</h1>
+        <p id="site-description">
+          Bản đồ kiến trúc và luồng vận hành của Didinhe Bridge.
+        </p>
+      </div>
+    </header>
+    <main class="layout" id="catalog-root">
+      <p class="notice" id="missing-topics"></p>
+      <nav aria-label="Lọc theo chủ đề">
+        <div class="filters" id="topic-filters"></div>
+      </nav>
+      <ul class="diagram-list" id="diagram-list" aria-live="polite"></ul>
+      <footer class="site-footer">
+        Diagram Archify standalone — mở từng file HTML để giữ đầy đủ tương tác viewer.
+        Nguồn cập nhật diagram nằm trong thư mục <code>sources/</code> của repository (không deploy lên Pages).
+      </footer>
+    </main>
+    <script src="assets/catalog.js"></script>
+  </body>
+</html>

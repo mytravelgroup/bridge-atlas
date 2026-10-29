@@ -1,0 +1,68 @@
+{
+  "siteTitle": "Bridge Atlas",
+  "siteDescription": "Bản đồ kiến trúc và luồng vận hành của Didinhe Bridge (Archify). Các diagram mô tả implementation tại revision được ghi — không tự động phản ánh master hiện tại.",
+  "diagrams": [
+    {
+      "id": "architecture-overview",
+      "title": "Didinhe Bridge — tổng quan kiến trúc",
+      "description": "Thành phần chính: GitHub, Bridge orchestrator, Cursor, task repo, control-plane worktree, dashboard và luồng giao hàng trên nhánh ai/*.",
+      "type": "architecture",
+      "typeLabel": "Architecture",
+      "topic": "overview",
+      "topicLabel": "Tổng quan kiến trúc",
+      "htmlPath": "diagrams/architecture-overview.html",
+      "sourcePath": "sources/architecture-overview.candidate.json",
+      "updatedAt": "2026-10-29",
+      "bridgeRevision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "bridgeRevisionShort": "b498ccb"
+    },
+    {
+      "id": "workflow-task-lifecycle",
+      "title": "Bridge — một task ai-ready đến giao hàng hoặc chặn",
+      "description": "Vòng đời một task từ preflight, claim, Cursor, delivery validation đến các nhánh chặn và điểm owner can thiệp.",
+      "type": "workflow",
+      "typeLabel": "Workflow",
+      "topic": "task",
+      "topicLabel": "Thực thi task",
+      "htmlPath": "diagrams/workflow-task-lifecycle.html",
+      "sourcePath": "sources/workflow-task-lifecycle.candidate.json",
+      "updatedAt": "2026-10-29",
+      "bridgeRevision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "bridgeRevisionShort": "b498ccb"
+    },
+    {
+      "id": "architecture-git-workspace",
+      "title": "Didinhe Bridge — Git working tree & linked worktrees",
+      "description": "Checkout chính cho ai/*, worktree control-plane và mobile-preview, cwd của Bridge/Cursor/validation/Metro, phần dùng chung vs cô lập.",
+      "type": "architecture",
+      "typeLabel": "Architecture",
+      "topic": "workspace",
+      "topicLabel": "Working tree / worktree",
+      "htmlPath": "diagrams/architecture-git-workspace.html",
+      "sourcePath": "sources/architecture-git-workspace.candidate.json",
+      "updatedAt": "2026-10-29",
+      "bridgeRevision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "bridgeRevisionShort": "b498ccb"
+    },
+    {
+      "id": "workflow-git-workspace-lifecycle",
+      "title": "Bridge — vòng đời Git workspace cho một task",
+      "description": "Preflight dirty tree, tạo nhánh trên checkout chính, Cursor cwd, checkpoint, return master, cleanup và rủi ro sai checkout.",
+      "type": "workflow",
+      "typeLabel": "Workflow",
+      "topic": "workspace",
+      "topicLabel": "Working tree / worktree",
+      "htmlPath": "diagrams/workflow-git-workspace-lifecycle.html",
+      "sourcePath": "sources/workflow-git-workspace-lifecycle.candidate.json",
+      "updatedAt": "2026-10-29",
+      "bridgeRevision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "bridgeRevisionShort": "b498ccb"
+    }
+  ],
+  "topics": [
+    { "id": "overview", "label": "Tổng quan kiến trúc" },
+    { "id": "task", "label": "Thực thi task" },
+    { "id": "workspace", "label": "Working tree / worktree" }
+  ],
+  "missingTopicsNote": "Chưa có diagram Archify hoàn chỉnh trong workspace cho: validation/repair chuyên biệt, recovery, review-fix/handoff. Sẽ bổ sung khi có bản finalize."
+}
