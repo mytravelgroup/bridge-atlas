@@ -5,16 +5,32 @@
     {
       "id": "architecture-overview",
       "title": "Didinhe Bridge — tổng quan kiến trúc",
-      "description": "Thành phần chính: GitHub, Bridge orchestrator, Cursor, task repo, control-plane worktree, dashboard và luồng giao hàng trên nhánh ai/*.",
+      "description": "Thành phần chính: GitHub, Bridge orchestrator, Cursor, task repo, control-plane worktree, dashboard, luồng giao hàng trên nhánh ai/* và vai trò GitHub Actions review transition (chuyển label issue sau review PR).",
       "type": "architecture",
       "typeLabel": "Architecture",
       "topic": "overview",
       "topicLabel": "Tổng quan kiến trúc",
       "htmlPath": "diagrams/architecture-overview.html",
       "sourcePath": "sources/architecture-overview.candidate.json",
-      "updatedAt": "2026-10-29",
+      "updatedAt": "2026-11-02",
       "bridgeRevision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
-      "bridgeRevisionShort": "b498ccb"
+      "bridgeRevisionShort": "b498ccb",
+      "relatedDiagramIds": ["workflow-review-transition"]
+    },
+    {
+      "id": "workflow-review-transition",
+      "title": "GitHub Actions — review transition (ChatGPT review marker)",
+      "description": "Happy path issue comment có marker: gates trust/checkpoint/round/HEAD, đổi label issue; nhánh pull_request_review submitted bị từ chối; Bridge sau ai-review-fix và ý nghĩa ai-done.",
+      "type": "workflow",
+      "typeLabel": "Workflow",
+      "topic": "review",
+      "topicLabel": "Review & handoff",
+      "htmlPath": "diagrams/workflow-review-transition.html",
+      "sourcePath": "sources/workflow-review-transition.candidate.json",
+      "updatedAt": "2026-11-02",
+      "bridgeRevision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "bridgeRevisionShort": "b498ccb",
+      "relatedDiagramIds": ["architecture-overview"]
     },
     {
       "id": "workflow-task-lifecycle",
@@ -61,8 +77,9 @@
   ],
   "topics": [
     { "id": "overview", "label": "Tổng quan kiến trúc" },
+    { "id": "review", "label": "Review & handoff" },
     { "id": "task", "label": "Thực thi task" },
     { "id": "workspace", "label": "Working tree / worktree" }
   ],
-  "missingTopicsNote": "Chưa có diagram Archify hoàn chỉnh trong workspace cho: validation/repair chuyên biệt, recovery, review-fix/handoff. Sẽ bổ sung khi có bản finalize."
+  "missingTopicsNote": "Chưa có diagram Archify hoàn chỉnh trong workspace cho: validation/repair chuyên biệt, recovery, chi tiết review-fix trong Bridge local. Sẽ bổ sung khi có bản finalize."
 }

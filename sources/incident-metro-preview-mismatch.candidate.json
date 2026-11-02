@@ -1,0 +1,332 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Sự cố — Metro/preview không khớp chỉnh sửa Cursor",
+    "subtitle": "Diễn lại từ tài liệu & code Bridge (không phải tái hiện bug thực tế)",
+    "output": ".archify/workflow-incident-metro-preview-mismatch-20261102-2230/incident-metro-preview-mismatch.html",
+    "quality_profile": "standard",
+    "locale": "en",
+    "repository": {
+      "url": "git@github.com:mytravelgroup/didinhe-mono.git",
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "link_mode": "local-only"
+    },
+    "views": [
+      {
+        "id": "v1_baseline",
+        "label": "1 · Hai workspace",
+        "focus": ["main_wt", "preview_wt"],
+        "note": "Task branch trên checkout chính; preview detached — Git không chia sẻ working tree."
+      },
+      {
+        "id": "v2_cursor",
+        "label": "2 · Cursor sửa đúng chỗ",
+        "focus": ["cursor_agent", "main_wt"],
+        "note": "cwd = task repo, nhánh ai/* — thay đổi file trên main worktree."
+      },
+      {
+        "id": "v3_lag",
+        "label": "3 · Preview chưa theo kịp",
+        "focus": ["preview_lag", "bridge_sync"],
+        "note": "Sync preview best-effort sau delivery; trước đó HEAD preview có thể cũ hơn."
+      },
+      {
+        "id": "v4_metro",
+        "label": "4 · Metro phục vụ cwd khác",
+        "focus": ["metro_process", "divergence"],
+        "note": "Bundler đọc tree nơi Metro spawn — không tự đọc file Cursor vừa sửa ở WT kia."
+      },
+      {
+        "id": "v5_recovery",
+        "label": "5 · Quan sát & phục hồi",
+        "focus": ["user_observes", "recovery_ops"],
+        "note": "Đối chiếu mobile-preview-state.json, worktree, ops mobile-expo-start."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "task_git", "label": "Main worktree (task repo)" },
+    { "id": "preview", "label": "Linked preview worktree" },
+    { "id": "bridge", "label": "Bridge / Cursor" },
+    { "id": "user", "label": "Owner quan sát" },
+    { "id": "evidence", "label": "Mức bằng chứng", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "baseline", "label": "Trạng thái ban đầu", "fromCol": 0, "toCol": 1 },
+    { "id": "trigger", "label": "Chỉnh sửa & preview", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "outcome", "label": "Sai lệch & phục hồi", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "main_wt",
+    "cursor_agent",
+    "preview_lag",
+    "metro_process",
+    "divergence",
+    "user_observes",
+    "recovery_ops"
+  ],
+  "nodes": [
+    {
+      "id": "main_wt",
+      "lane": "task_git",
+      "col": 0,
+      "type": "database",
+      "label": "Main worktree",
+      "sublabel": "HEAD = nhánh ai/* · Cursor cwd",
+      "width": 150,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 265,
+          "end_line": 266
+        },
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 2739,
+          "end_line": 2739
+        }
+      ]
+    },
+    {
+      "id": "preview_wt",
+      "lane": "preview",
+      "col": 0,
+      "type": "database",
+      "label": "Preview worktree",
+      "sublabel": ".worktrees/mobile-preview · detached",
+      "width": 158,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 266,
+          "end_line": 268
+        },
+        {
+          "path": "tools/didinhe-bridge/src/mobile-preview/worktree-paths.ts",
+          "line": 3,
+          "end_line": 8
+        }
+      ]
+    },
+    {
+      "id": "cursor_agent",
+      "lane": "bridge",
+      "col": 1,
+      "type": "external",
+      "label": "Cursor Agent",
+      "sublabel": "Sửa apps/* trên main WT",
+      "width": 140,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 56,
+          "end_line": 56
+        },
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 2706,
+          "end_line": 2741
+        }
+      ]
+    },
+    {
+      "id": "preview_lag",
+      "lane": "preview",
+      "col": 2,
+      "type": "security",
+      "label": "Preview HEAD lệch",
+      "sublabel": "Chưa sync PR head / runtimeReady=false",
+      "width": 168,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 270,
+          "end_line": 274
+        }
+      ]
+    },
+    {
+      "id": "bridge_sync",
+      "lane": "bridge",
+      "col": 2,
+      "yOffset": 100,
+      "type": "backend",
+      "label": "Preview sync (Bridge)",
+      "sublabel": "Sau initial/review-fix delivery",
+      "width": 158,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 270,
+          "end_line": 270
+        },
+        {
+          "path": "tools/didinhe-bridge/src/mobile-preview/worktree.ts",
+          "line": 198,
+          "end_line": 204
+        }
+      ]
+    },
+    {
+      "id": "metro_process",
+      "lane": "preview",
+      "col": 3,
+      "type": "backend",
+      "label": "Metro / Expo",
+      "sublabel": "cwd preview app hoặc reuse owner cũ",
+      "width": 158,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 244,
+          "end_line": 248
+        },
+        {
+          "path": "tools/didinhe-bridge/src/operations/mobile-expo-start-handler.ts",
+          "line": 265,
+          "end_line": 291
+        }
+      ]
+    },
+    {
+      "id": "legacy_main_root",
+      "lane": "evidence",
+      "col": 3,
+      "yOffset": -110,
+      "type": "security",
+      "label": "Rủi ro legacy cwd",
+      "sublabel": "main-worktree-root nếu preview chưa ready",
+      "width": 168,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/operations/mobile-expo-start-target.ts",
+          "line": 152,
+          "end_line": 164
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 233,
+          "end_line": 233
+        }
+      ]
+    },
+    {
+      "id": "divergence",
+      "lane": "task_git",
+      "col": 4,
+      "type": "security",
+      "label": "Hai cây file khác nhau",
+      "sublabel": "Bundler ≠ tree Cursor vừa sửa",
+      "width": 168,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 268,
+          "end_line": 268
+        }
+      ]
+    },
+    {
+      "id": "user_observes",
+      "lane": "user",
+      "col": 4,
+      "yOffset": 100,
+      "type": "external",
+      "label": "Triệu chứng",
+      "sublabel": "UI cũ / không khớp sửa Cursor",
+      "width": 150,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 274,
+          "end_line": 274
+        }
+      ]
+    },
+    {
+      "id": "recovery_ops",
+      "lane": "bridge",
+      "col": 5,
+      "type": "backend",
+      "label": "Phục hồi (ops)",
+      "sublabel": "state JSON · worktree · expo-start",
+      "width": 158,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 291,
+          "end_line": 302
+        },
+        {
+          "path": "tools/didinhe-bridge/src/operations/mobile-expo-start-handler.ts",
+          "line": 293,
+          "end_line": 297
+        }
+      ]
+    },
+    {
+      "id": "unknown_root",
+      "lane": "evidence",
+      "col": 5,
+      "yOffset": 100,
+      "type": "external",
+      "label": "Chưa xác định",
+      "sublabel": "Case log cụ thể của bạn",
+      "width": 140,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 5,
+          "end_line": 5
+        }
+      ]
+    }
+  ],
+  "edges": [
+    { "from": "main_wt", "to": "cursor_agent", "label": "cwd repoRoot" },
+    { "from": "cursor_agent", "to": "main_wt", "label": "mutate files", "variant": "dashed" },
+    {
+      "from": "cursor_agent",
+      "to": "preview_lag",
+      "label": "không auto-sync preview",
+      "variant": "dashed"
+    },
+    { "from": "preview_wt", "to": "preview_lag", "label": "HEAD có thể cũ" },
+    { "from": "bridge_sync", "to": "preview_wt", "label": "sync detached", "variant": "dashed" },
+    { "from": "preview_lag", "to": "metro_process", "label": "spawn/reuse" },
+    { "from": "legacy_main_root", "to": "metro_process", "label": "giả thuyết cwd", "variant": "dashed" },
+    { "from": "metro_process", "to": "divergence", "label": "serve bundle" },
+    { "from": "main_wt", "to": "divergence", "label": "edits ở đây", "variant": "emphasis" },
+    { "from": "divergence", "to": "user_observes", "label": "Tailscale / device" },
+    { "from": "user_observes", "to": "recovery_ops", "label": "owner ops" },
+    { "from": "recovery_ops", "to": "preview_wt", "label": "reconcile", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Đã xác nhận",
+      "items": [
+        "Cursor và task Git chạy trên main worktree (nhánh ai/*); Metro steady-state nhắm .worktrees/mobile-preview/apps/mobile (§3.8–3.9).",
+        "Preview sync PR head best-effort sau delivery — không tự mirror mọi thay đổi local trên task branch.",
+        "Bridge ghi runtime/sync trong .ai/logs/bridge/mobile-preview-state.json và có thể reuse Metro đã verify."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Giả thuyết / rủi ro",
+      "items": [
+        "Metro legacy hoặc reuse fingerprint main-worktree-root trong khi Cursor sửa trên ai/* (resolveMobileExpoStartSpawnTarget khi runtimeReady=false).",
+        "Reuse Metro khi preview HEAD đã đổi nhưng process chưa restart (handler kiểm tra verifiedMetroServesPreviewHead — vẫn có cửa sổ stale)."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chưa xác định",
+      "items": [
+        "Không có issue/log timestamped trong workspace chứng minh một lần chạy cụ thể của bạn.",
+        "Nguyên nhân gốc từng phiên (manual pnpm từ root, port 8081 process lạ, v.v.) cần đối chiếu PID/fingerprint thực tế."
+      ]
+    }
+  ]
+}

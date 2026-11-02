@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html .nojekyll _site/
-          cp -r assets diagrams _site/
+          cp -r assets diagrams incident-lab _site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

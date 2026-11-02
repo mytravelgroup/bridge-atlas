@@ -66,9 +66,10 @@
       "id": "gh-actions",
       "type": "security",
       "label": "GitHub Actions",
-      "sublabel": "didinhe-chatgpt-review-transition",
+      "sublabel": "Kiểm tra review · chuyển label issue",
+      "tag": "review-transition",
       "pos": [280, 360],
-      "size": [150, 72],
+      "size": [175, 80],
       "sources": [
         {
           "path": ".github/workflows/didinhe-chatgpt-review-transition.yml",
@@ -214,7 +215,7 @@
       "id": "github-to-actions",
       "from": "github",
       "to": "gh-actions",
-      "label": "comment / review event",
+      "label": "PR comment / review event",
       "fromSide": "bottom",
       "toSide": "top"
     },
@@ -222,8 +223,15 @@
       "id": "actions-to-github",
       "from": "gh-actions",
       "to": "github",
-      "label": "ai-review-* labels",
+      "label": "gh issue edit labels",
       "variant": "security"
+    },
+    {
+      "id": "labels-to-bridge",
+      "from": "github",
+      "to": "bridge",
+      "label": "ai-review-fix → Bridge poll",
+      "variant": "dashed"
     },
     {
       "id": "bridge-to-cursor",
@@ -264,7 +272,17 @@
       "items": [
         "Mỗi poll: tối đa một việc — recovery ai-processing, blocked control, review-fix, ops-ready, rồi ai-ready (task-orchestration.ts).",
         "Sau claim: readiness → nhánh ai/* → Cursor → validate → commit/push → PR → checkpoint/handoff → ai-review-ready.",
-        "CHANGES_REQUESTED → ai-review-fix; APPROVED → workflow Actions gán ai-review-approved / ai-done; owner merge thủ công."
+        "CHANGES_REQUESTED → ai-review-fix; APPROVED → workflow Actions gán ai-review-approved / ai-done; owner merge thủ công.",
+        "Chi tiết review transition: diagram workflow-review-transition (Bridge Atlas)."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "GitHub Actions review transition",
+      "items": [
+        "Không gọi ChatGPT, không review code, không merge PR — chỉ chạy TS validate + gh issue edit label.",
+        "Trigger thực tế: issue_comment trên PR có marker <!-- didinhe-chatgpt-review -->; pull_request_review submitted chạy job nhưng CLI từ chối (không phải conversation comment).",
+        "Reviewer đăng parser-valid PR conversation comment; workflow đọc metadata/checkpoint rồi cập nhật label issue nguồn."
       ]
     },
     {

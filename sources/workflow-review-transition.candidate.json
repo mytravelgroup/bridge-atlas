@@ -1,0 +1,392 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Didinhe Bridge — ChatGPT review transition (GitHub Actions)",
+    "subtitle": "Validate PR conversation review → mutate labels on source issue",
+    "output": ".archify/workflow-bridge-review-transition-20261102-2306/workflow-review-transition.html",
+    "quality_profile": "standard",
+    "locale": "en",
+    "repository": {
+      "url": "git@github.com:mytravelgroup/didinhe-mono.git",
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "link_mode": "local-only"
+    },
+    "views": [
+      {
+        "id": "v_trigger",
+        "label": "1 · Trigger",
+        "focus": ["post_review", "evt_comment", "evt_pr_review"],
+        "note": "YAML job if: marker comment hoặc mọi pull_request_review submitted."
+      },
+      {
+        "id": "v_cli",
+        "label": "2 · CLI routing",
+        "focus": ["gha_job", "cli_issue_path", "cli_review_reject"],
+        "note": "Chỉ issue_comment + marker đi evaluate đầy đủ."
+      },
+      {
+        "id": "v_gates",
+        "label": "3 · Validation gates",
+        "focus": ["gate_bundle"],
+        "note": "Trust, latest marker, delivery/handoff, round, HEAD, ai-review-ready."
+      },
+      {
+        "id": "v_outcome",
+        "label": "4 · Labels",
+        "focus": ["apply_labels", "plan_cr", "plan_approved"],
+        "note": "CHANGES_REQUESTED vs APPROVED label plans."
+      },
+      {
+        "id": "v_bridge",
+        "label": "5 · Bridge tiếp nối",
+        "focus": ["bridge_review_fix", "bridge_ai_done"],
+        "note": "ai-done ≠ merge PR; Bridge claim review-fix khi ai-review-fix."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "reviewer", "label": "Reviewer (GitHub)" },
+    { "id": "github", "label": "GitHub events" },
+    { "id": "gha", "label": "GitHub Actions job" },
+    { "id": "transition", "label": "Transition CLI (TS)" },
+    { "id": "bridge", "label": "Bridge local (poll)" }
+  ],
+  "phases": [
+    { "id": "trigger", "label": "Trigger", "fromCol": 0, "toCol": 1 },
+    { "id": "run", "label": "Workflow + CLI", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "result", "label": "Labels & Bridge", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "post_review",
+    "evt_comment",
+    "gha_job",
+    "cli_issue_path",
+    "gate_bundle",
+    "apply_labels",
+    "plan_cr",
+    "bridge_review_fix"
+  ],
+  "nodes": [
+    {
+      "id": "post_review",
+      "lane": "reviewer",
+      "col": 0,
+      "type": "external",
+      "label": "Đăng review",
+      "sublabel": "Top-level PR comment + marker",
+      "width": 150,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review.ts",
+          "line": 1,
+          "end_line": 1
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 63,
+          "end_line": 63
+        }
+      ]
+    },
+    {
+      "id": "evt_comment",
+      "lane": "github",
+      "col": 1,
+      "type": "messagebus",
+      "label": "issue_comment created",
+      "sublabel": "PR thread · có marker",
+      "width": 158,
+      "sources": [
+        {
+          "path": ".github/workflows/didinhe-chatgpt-review-transition.yml",
+          "line": 4,
+          "end_line": 7
+        },
+        {
+          "path": ".github/workflows/didinhe-chatgpt-review-transition.yml",
+          "line": 20,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "evt_pr_review",
+      "lane": "github",
+      "col": 1,
+      "yOffset": -110,
+      "type": "messagebus",
+      "label": "pull_request_review",
+      "sublabel": "submitted · không đủ canonical",
+      "width": 168,
+      "sources": [
+        {
+          "path": ".github/workflows/didinhe-chatgpt-review-transition.yml",
+          "line": 6,
+          "end_line": 7
+        },
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-verified-handoff.ts",
+          "line": 101,
+          "end_line": 113
+        }
+      ]
+    },
+    {
+      "id": "gha_job",
+      "lane": "gha",
+      "col": 2,
+      "type": "security",
+      "label": "Workflow job",
+      "sublabel": "checkout master · pnpm · CLI",
+      "width": 150,
+      "sources": [
+        {
+          "path": ".github/workflows/didinhe-chatgpt-review-transition.yml",
+          "line": 27,
+          "end_line": 50
+        }
+      ]
+    },
+    {
+      "id": "cli_issue_path",
+      "lane": "transition",
+      "col": 3,
+      "type": "backend",
+      "label": "Issue comment path",
+      "sublabel": "FromIssueCommentEvent",
+      "width": 180,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition-github.ts",
+          "line": 271,
+          "end_line": 286
+        },
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition-github.ts",
+          "line": 523,
+          "end_line": 557
+        }
+      ]
+    },
+    {
+      "id": "cli_review_reject",
+      "lane": "transition",
+      "col": 3,
+      "yOffset": -110,
+      "type": "security",
+      "label": "PR Review object",
+      "sublabel": "PR_REVIEW_OBJECT_INSUFFICIENT",
+      "width": 168,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition-github.ts",
+          "line": 534,
+          "end_line": 538
+        }
+      ]
+    },
+    {
+      "id": "gate_bundle",
+      "lane": "transition",
+      "col": 4,
+      "type": "security",
+      "label": "Evaluate transition",
+      "sublabel": "trust · latest · checkpoint · round · HEAD",
+      "width": 180,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition.ts",
+          "line": 335,
+          "end_line": 362
+        },
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition.ts",
+          "line": 471,
+          "end_line": 521
+        }
+      ]
+    },
+    {
+      "id": "gate_approved",
+      "lane": "transition",
+      "col": 4,
+      "yOffset": 110,
+      "type": "security",
+      "label": "APPROVED gates",
+      "sublabel": "validation PASS · tech-debt handoff",
+      "width": 158,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition.ts",
+          "line": 566,
+          "end_line": 590
+        }
+      ]
+    },
+    {
+      "id": "reject_report",
+      "lane": "transition",
+      "col": 4,
+      "yOffset": -110,
+      "type": "external",
+      "label": "Từ chối",
+      "sublabel": "report + recoveryAction · exit 1",
+      "width": 150,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition-github.ts",
+          "line": 556,
+          "end_line": 557
+        }
+      ]
+    },
+    {
+      "id": "apply_labels",
+      "lane": "gha",
+      "col": 5,
+      "type": "backend",
+      "label": "Apply label plan",
+      "sublabel": "gh issue edit · reconcile partial",
+      "width": 190,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition-github.ts",
+          "line": 440,
+          "end_line": 520
+        },
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition.ts",
+          "line": 655,
+          "end_line": 668
+        }
+      ]
+    },
+    {
+      "id": "plan_cr",
+      "lane": "github",
+      "col": 5,
+      "yOffset": -110,
+      "type": "database",
+      "label": "CHANGES_REQUESTED",
+      "sublabel": "+ai-review-fix −ai-review-ready",
+      "width": 168,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition.ts",
+          "line": 107,
+          "end_line": 111
+        }
+      ]
+    },
+    {
+      "id": "plan_approved",
+      "lane": "github",
+      "col": 5,
+      "yOffset": 110,
+      "type": "database",
+      "label": "APPROVED",
+      "sublabel": "+approved,+ai-done −ready/fix/fixing",
+      "width": 168,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition.ts",
+          "line": 114,
+          "end_line": 117
+        }
+      ]
+    },
+    {
+      "id": "bridge_review_fix",
+      "lane": "bridge",
+      "col": 5,
+      "type": "backend",
+      "label": "Bridge review-fix",
+      "sublabel": "claim ai-review-fix → Cursor delivery",
+      "width": 168,
+      "sources": [
+        {
+          "path": "tools/didinhe-bridge/src/index.ts",
+          "line": 939,
+          "end_line": 944
+        },
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 119,
+          "end_line": 119
+        }
+      ]
+    },
+    {
+      "id": "bridge_ai_done",
+      "lane": "bridge",
+      "col": 5,
+      "yOffset": 110,
+      "type": "backend",
+      "label": "Sau ai-done",
+      "sublabel": "Owner merge thủ công · PR/issue OPEN",
+      "width": 168,
+      "sources": [
+        {
+          "path": "docs/didinhe-bridge-workflow.md",
+          "line": 63,
+          "end_line": 63
+        },
+        {
+          "path": "tools/didinhe-bridge/src/chatgpt-review-transition.ts",
+          "line": 42,
+          "end_line": 42
+        }
+      ]
+    }
+  ],
+  "edges": [
+    { "from": "post_review", "to": "evt_comment", "label": "conversation comment" },
+    { "from": "evt_comment", "to": "gha_job", "label": "webhook" },
+    { "from": "evt_pr_review", "to": "gha_job", "label": "webhook", "variant": "dashed" },
+    { "from": "gha_job", "to": "cli_issue_path", "label": "marker path" },
+    { "from": "gha_job", "to": "cli_review_reject", "label": "review object", "variant": "security" },
+    { "from": "cli_review_reject", "to": "reject_report", "label": "exit 1", "variant": "security" },
+    { "from": "cli_issue_path", "to": "gate_bundle", "label": "evaluate" },
+    { "from": "gate_bundle", "to": "reject_report", "label": "fail", "variant": "security" },
+    { "from": "gate_bundle", "to": "gate_approved", "label": "APPROVED only", "variant": "dashed" },
+    { "from": "gate_bundle", "to": "apply_labels", "label": "pass" },
+    { "from": "apply_labels", "to": "plan_cr", "label": "status CR", "variant": "dashed" },
+    { "from": "apply_labels", "to": "plan_approved", "label": "status APPROVED", "variant": "dashed" },
+    { "from": "plan_cr", "to": "bridge_review_fix", "label": "poll labels" },
+    { "from": "plan_approved", "to": "bridge_ai_done", "label": "Bridge không auto-merge" },
+    {
+      "from": "bridge_review_fix",
+      "to": "post_review",
+      "label": "sau delivery → ai-review-ready",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Đã xác nhận",
+      "items": [
+        "Actions không gọi LLM; chạy chatgpt-review-transition-cli.ts với GITHUB_TOKEN.",
+        "Inline review threads / submitted Review object alone không transition — cần top-level comment có <!-- didinhe-chatgpt-review -->.",
+        "Đánh giá lại PR HEAD ngay trước gh issue edit; partial label retry qua filterPendingLabelMutationSteps."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Inline vs conversation",
+      "items": [
+        "evaluateChatGptReviewTransition fail closed NOT_PR_CONVERSATION_COMMENT cho non-top-level.",
+        "pull_request_review submitted vẫn khởi chạy workflow (YAML) nhưng CLI exit 1 với hướng dẫn repost conversation comment."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chưa đủ bằng chứng",
+      "items": [
+        "Không có log Actions cụ thể trong repo cho một lần transition thất bại thực tế.",
+        "Hành vi GitHub khi job exit 1 vs label đã mutate một phần — reconcile theo code, chưa tái hiện end-to-end."
+      ]
+    }
+  ]
+}
