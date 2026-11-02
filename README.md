@@ -25,6 +25,7 @@ Mở `http://127.0.0.1:8080/` — link diagram dùng đường dẫn tương đ�
 | `index.html` | Mục lục |
 | `assets/` | CSS, JS, `diagrams.json` (metadata) |
 | `diagrams/` | HTML Archify đã finalize (deploy) |
+| `incident-lab/` | Inventory sự cố + scenario HTML (deploy; `sources/` vẫn không deploy) |
 | `sources/` | `*.candidate.json` Archify (repo Git, **không** deploy Pages) |
 | `.github/workflows/pages.yml` | Deploy GitHub Pages |
 
@@ -37,6 +38,12 @@ Mở `http://127.0.0.1:8080/` — link diagram dùng đường dẫn tương đ�
 5. Kiểm tra HTML: không path máy local, token, PII; chỉ tham chiếu repo path tương đối như trong evidence Archify.
 6. Chạy local HTTP server, kiểm tra mục lục và mở diagram.
 7. Commit và push `main` — workflow deploy tự chạy (hoặc `workflow_dispatch`).
+
+### Incident Lab
+
+1. Finalize scenario trong monorepo `.archify/`, copy HTML vào `incident-lab/scenarios/`, candidate vào `sources/`.
+2. Cập nhật `incident-lab/inventory.json` (`scenarioReady`, `scenarioHtml`, `notes`, revision có bằng chứng).
+3. Trong viewer Archify, dùng **Guided views** (1–5) trên diagram workflow để đi từng bước; không thay core viewer.
 
 ## Publish (GitHub Pages)
 

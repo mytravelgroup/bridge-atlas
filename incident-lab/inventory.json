@@ -1,0 +1,82 @@
+{
+  "title": "Incident Lab — inventory",
+  "description": "Triệu chứng cần xác minh từ tài liệu, code và artifact Archify. Trạng thái sửa lỗi chỉ ghi khi có bằng chứng trong repo/docs — không suy diễn lịch sử vận hành.",
+  "bridgeRevisionDefault": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+  "items": [
+    {
+      "id": "dirty-working-tree",
+      "symptom": "Dirty working tree chặn task / claim",
+      "evidence": [
+        "docs/didinhe-bridge-workflow.md §7 (master-dirty, working-tree-dirty)",
+        "tools/didinhe-bridge/src/index.ts getRepositoryTaskState",
+        "tools/didinhe-bridge/src/repository-readiness.ts assertWorkingTreeClean"
+      ],
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "fixStatus": "confirmed-behavior",
+      "scenarioReady": false,
+      "notes": "Đủ bằng chứng cho diagram preflight; chưa có kịch bản Incident Lab riêng."
+    },
+    {
+      "id": "validation-scope",
+      "symptom": "Validation có phạm vi quá rộng (Cursor vs Bridge authoritative)",
+      "evidence": [
+        "docs/didinhe-bridge-workflow.md §8",
+        "tools/didinhe-bridge/src/bridge-delivery-validation-scope.ts"
+      ],
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "fixStatus": "unknown",
+      "scenarioReady": false,
+      "notes": "Cần đối chiếu policy version và repair loop; chưa dựng scenario."
+    },
+    {
+      "id": "metro-preview-mismatch",
+      "symptom": "Cursor sửa đúng code nhưng Metro/preview hiển thị code cũ hoặc từ checkout khác",
+      "evidence": [
+        "docs/didinhe-bridge-workflow.md §3.8–3.9",
+        "tools/didinhe-bridge/src/operations/mobile-expo-start-target.ts",
+        "tools/didinhe-bridge/src/operations/mobile-expo-start-handler.ts"
+      ],
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "fixStatus": "partial-mitigation",
+      "scenarioReady": true,
+      "scenarioHtml": "scenarios/metro-preview-mismatch.html",
+      "notes": "Kiến trúc tách main WT vs preview WT; mitigation qua sync/restart — không chứng minh một incident log cụ thể."
+    },
+    {
+      "id": "review-fix-loop",
+      "symptom": "Review–fix loop lặp lại",
+      "evidence": [
+        "tools/didinhe-bridge/src/review-fix-recovery.ts",
+        "docs/didinhe-bridge-workflow.md §5–6"
+      ],
+      "revision": "Chưa xác định",
+      "fixStatus": "unknown",
+      "scenarioReady": false,
+      "notes": "Cần issue/PR và checkpoint comments cụ thể."
+    },
+    {
+      "id": "stale-lock-metadata",
+      "symptom": "Lock hoặc metadata cũ ảnh hưởng lần chạy tiếp theo",
+      "evidence": [
+        "tools/didinhe-bridge/src/single-instance-lock.ts",
+        "docs/didinhe-bridge-workflow.md §2 (stale lock 60s)"
+      ],
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "fixStatus": "confirmed-behavior",
+      "scenarioReady": false,
+      "notes": "Hành vi stale recovery có trong code; chưa có timeline incident."
+    },
+    {
+      "id": "single-instance-ghost",
+      "symptom": "Single-instance lock không phản ánh process thực tế",
+      "evidence": [
+        "tools/didinhe-bridge/src/single-instance-bridge-owner.ts",
+        "tools/didinhe-bridge/src/single-instance-lock.ts"
+      ],
+      "revision": "b498ccb43db9ac2c6f95e3ac9564362acd3d0fe5",
+      "fixStatus": "unknown",
+      "scenarioReady": false,
+      "notes": "Cần log PID/ownerToken thực tế để mô phỏng; không suy diễn."
+    }
+  ]
+}
